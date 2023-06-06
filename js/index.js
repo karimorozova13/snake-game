@@ -25,6 +25,7 @@ let accTime = 0;
 
 ws.onmessage = (event) => {
   const state = JSON.parse(event.data);
+  console.log(state);
   snakeDir = state.snakeDir;
 };
 document.addEventListener("keydown", (e) => {
