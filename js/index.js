@@ -1,3 +1,5 @@
+const ws = new WebSocket("ws://localhost:8080");
+
 let canvas;
 let ctx;
 let newPos;
@@ -21,16 +23,20 @@ let oldTimeStamp = 0;
 let fps;
 let accTime = 0;
 
+ws.onmessage = (event) => {
+  const state = JSON.parse(event.data);
+  snakeDir = state.snakeDir;
+};
 document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown") {
-    if (snakeDir.y === 0) snakeDir = { x: 0, y: 10 };
-  } else if (e.key === "ArrowRight") {
-    if (snakeDir.x === 0) snakeDir = { x: 10, y: 0 };
-  } else if (e.key === "ArrowUp") {
-    if (snakeDir.y === 0) snakeDir = { x: 0, y: -10 };
-  } else if (e.key === "ArrowLeft") {
-    if (snakeDir.x === 0) snakeDir = { x: -10, y: 0 };
-  }
+  const message = JSON.stringify({ direction: e.key });
+  ws.send(message);
+
+  ws.onmessage = (event) => {
+    ws.send(message);
+
+    const state = JSON.parse(event.data);
+    snakeDir = state.snakeDir;
+  };
 });
 
 function canvasCreation() {
@@ -76,7 +82,10 @@ function drawSnake() {
 function makeSquarePos() {
   squareY = Math.floor((Math.random() * width) / scale) * 10 + 10;
   squareX = Math.floor((Math.random() * height) / scale) * 10 + 10;
-  if (snake.some(({ x, y }) => x === squareX && y === squareY)) makeSquarePos();
+  // if (snake.some(({ x, y }) => x === squareX && y === squareY)) {
+  //   console.log(33);
+  //   makeSquarePos();
+  // }
 }
 
 function drawSquare() {
@@ -90,7 +99,9 @@ function catchTheSquare() {
       y: snake[snake.length - 1].y - 10,
     });
     makeSquarePos();
-    speed -= 5;
+    console.log("where is square");
+
+    speed -= 1;
     return;
   }
 }
